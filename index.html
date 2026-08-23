@@ -438,7 +438,7 @@
         <div class="cyber-card">
             <h1>প্রোটোকল এন্ট্রি</h1>
             <div class="cyber-quotes">
-                শুরু করুন বাটনে ক্লিক করার পর মোবাইল এর সামনে হাত প্রদর্শন করুন।রোবট গান বাজানো শুরু করবে!
+                শুরু করুন বাটনে ক্লিক করার পর মোবাইল এর সামনে হাত প্রদর্শন করুন 🤚 ।রোবট গান বাজানো শুরু করবে!
             </div>
             <button id="start-btn" class="cyber-btn"> শুরু করুন </button>
         </div>
@@ -447,7 +447,7 @@
     <!-- ২. রোবট ও ক্যামেরা স্ক্রিন -->
     <div id="robot-screen" class="screen hidden">
         <video id="webcam" autoplay playsinline muted></video>
-        <div id="hud-top-instruction">STATUS: SCANNING GESTURE... (হাত দেখান)</div>
+        <div id="hud-top-instruction">Volume Full করুন & (হাত দেখান🤚)</div>
         <div id="hud-status">WAITING FOR HAND DETECTION...</div>
         
         <div id="robot-container">
@@ -631,14 +631,14 @@
                     }
 
                     if (distance < 0.25) {
-                        hudTopInstruction.innerText = "ধন্যবাদ আমার সং শোনার জন্য";
+                        hudTopInstruction.innerText = "ধন্যবাদ আমার গান শোনার জন্য";
                         hudStatus.innerText = "STATUS: FIST CLOSED -> EXITING...";
                         
                         setTimeout(() => {
                             resetToHomePage();
                         }, 1200);
                     } else {
-                        hudTopInstruction.innerText = "✊ হাত মুষ্টি (Fist) করুন তাহলে সং অফ হবে!";
+                        hudTopInstruction.innerText = "✊হাত মুষ্টি করুন গান অফ হবে!";
                         hudStatus.innerText = "STATUS: SONG PLAYING 🎵";
                     }
                 } else {
